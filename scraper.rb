@@ -1,4 +1,4 @@
-
+gem 'geocoder'
 require 'nokogiri'
 require 'httparty'
 require 'json'
@@ -8,7 +8,7 @@ require 'mechanize'
 require 'headless'
 require 'watir'
 require "open-uri"
-
+require 'geocoder'
 require_relative 'scrapmethod'
 
 # gets relevant listing links for county
@@ -40,12 +40,11 @@ browser = Watir::Browser.start url
 
 data = ScrapeData.new(browser)
 data.setup
-pry.start(binding)
 
 browser.close
 headless.destroy
 
-=begin
+
 url = 'https://peerdistrict.com/en/login'
 
 headless = Headless.new
@@ -56,9 +55,9 @@ auto_list = AutoPost.new(browser, data)
 auto_list.login_peerdistrict
 auto_list.post_peerdistrict
 
+
 pry.start(binding)
 
 
 browser.close
 headless.destroy
-=end

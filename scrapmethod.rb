@@ -1,9 +1,9 @@
 class ScrapeData
 attr_reader :body
 attr_reader :listing_title
-attr_reader :longitude
-attr_reader :latitude
 attr_reader :image_titles
+attr_reader :address
+attr_reader :city
 
     def initialize(browser)
         # Instance variables
@@ -15,6 +15,7 @@ attr_reader :image_titles
     def setup
         img_num
         scrape_text
+        location
         img_dl
     end
     
@@ -54,7 +55,14 @@ attr_reader :image_titles
         @latitude = @browser.div(:id, 'map').data_latitude
         @longitude = @browser.div(:id, 'map').data_longitude
     end
-
+    
+    def location
+        geo_localization = "#{@latitude},#{@longitude}"
+        query = Geocoder.search(geo_localization).first
+        @address = query.address
+        @city = query.city
+    end
+    
     def delete
         @image_titles.each do |title|
             File.delete(title)
@@ -108,11 +116,9 @@ attr_reader :browser
         # sets listing body
         @browser.form(:id, 'new_listing').textarea.set @post_object.body
         # sets location
-        @browser.text_field(:id, 'listing_origin').set "huntington beach, ca"
-        # upload file 
-        photo = File.open(@post_object.image_titles[0], "r+") 
-        path = File.expand_path(photo)
-        @browser.file_field(:type,"file").set(path)
+        @browser.text_field(:id, 'listing_origin').set @post_object.address
+        photo_upload
+        
  #      File.close
 
         # posts listing
@@ -124,6 +130,16 @@ attr_reader :browser
         # clicks post listing
         @browser.button(:name, 'button').click
     end
+    
+    def photo_upload
+        # upload file 
+        @post_object.image_titles.each do |title|
+            photo = File.open(title, "r+") 
+            path = File.expand_path(photo)
+            @browser.file_field(:type,"file").set(path)
+        end
+    end
+
     
 end
 
