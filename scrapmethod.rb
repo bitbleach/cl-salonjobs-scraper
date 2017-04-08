@@ -5,21 +5,30 @@ attr_reader :longitude
 attr_reader :latitude
 attr_reader :image_titles
 
-    def initialize(num, browser)
+    def initialize(browser)
         # Instance variables
-        @num = num
         @browser = browser
         @image_titles = []
         @image_links = []
     end
     
     def setup
+        img_num
         scrape_text
         img_dl
     end
     
+    def img_num
+        @img_num = @browser.span(:class, 'slider-info').text
+        @img_num = @img_num[-1].to_i
+        
+        if @img_num > 5
+            @img_num = 5
+        end
+    end
+    
     def img_dl
-        (1..@num).each do |count|
+        (1..@img_num).each do |count|
             
             href_holder = @browser.a(:title, "#{count}").href
             @image_links.push(href_holder)
@@ -110,3 +119,65 @@ attr_reader :browser
     end
     
 end
+
+
+class Container
+attr_reader :links
+attr_reader :list_count
+
+    def initialize(browser)
+        # Instance variables
+        @browser = browser
+        @links = []
+    end
+    
+    def setup
+        filter
+        get_list_count
+        crawl
+    end
+    
+    def get_links
+        @browser.as(:class, 'result-title hdrlnk').each do |link|
+        href = link.href
+        title = link.text
+            if @county_match === href
+                unless @avoid_title === title
+                    unless title.empty?
+                        @links.push(href)
+                    end
+                end
+            end
+        end 
+    end
+    
+    def crawl
+        get_links
+        if @clicks > 0 
+            (1..@clicks).each do |x|
+                sleep(5)
+                @browser.a(:title, 'next page').click
+                get_links
+            end
+        end
+    end
+
+    def get_list_count
+         @list_count = @browser.span(:class, 'totalcount').text.to_i
+         if @list_count > 120
+            @clicks = (@list_count/120).floor
+         else
+            @clicks = 0
+         end
+    end
+    
+    def filter
+        url = @browser.url
+        pattern = /(?<=\/\/).*(?=\.c)/
+        @county_match = url.match pattern
+        @county_match = /#{@county_match[0]}/
+        @avoid_title = [/sola/i, /phenix/i]
+        @avoid_title = Regexp.union(@avoid_title)
+    end
+end
+

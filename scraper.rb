@@ -11,41 +11,40 @@ require "open-uri"
 
 require_relative 'scrapmethod'
 
-
+# gets relevant listing links for county
 =begin
-url = 'https://orangecounty.craigslist.org/search/spa'
+url = 'https://orangecounty.craigslist.org/search/spa?query=stylist&hasPic=1&bundleDuplicates=1'
 
-page = HTTParty.get(url)
+headless = Headless.new
+headless.start
+browser = Watir::Browser.start url
 
-parse_page = Nokogiri::HTML(page)
+list_data = Container.new(browser)
+list_data.setup
 
-title_array = []
-listing_url_array = []
+puts list_data.links.size
 
-test = Container.new(parse_page)
-test.get_lists
-test.get_href
-test.get_links
+pry.start(binding)
 
-# no image
-#url = 'https://orangecounty.craigslist.org/spa/6067504265.html'
-# with image
-#url = 'https://orangecounty.craigslist.org/spa/6069870711.html'
-# google map scrape
+browser.close
+headless.destroy
 
 =end
+
+# gets data from individual listing
 url = 'https://orangecounty.craigslist.org/spa/6075356365.html'
 
 headless = Headless.new
 headless.start
 browser = Watir::Browser.start url
 
-data = ScrapeData.new(2 ,browser)
+data = ScrapeData.new(browser)
 data.setup
 
 browser.close
 headless.destroy
 
+=begin
 url = 'https://peerdistrict.com/en/login'
 
 headless = Headless.new
@@ -61,3 +60,4 @@ pry.start(binding)
 
 browser.close
 headless.destroy
+=end
