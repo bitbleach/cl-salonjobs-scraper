@@ -49,11 +49,13 @@ attr_reader :image_titles
 end
 
 
-class PostPeerdistrict
+class AutoPost 
+attr_reader :browser
 
-    def initialize(browser)
+    def initialize(browser, object)
         # Instance variables
         @browser = browser
+        @post_object = object
     end
     
     def login_peerdistrict
@@ -84,27 +86,27 @@ class PostPeerdistrict
         # Hiring Employees 58185
         @browser.div(:id, 'option-groups').a(:data_id, '58185').click
         # sets listing title
-        @browser.text_field(:id, 'listing_title').set "test auto post"
+        @browser.text_field(:id, 'listing_title').set @post_object.listing_title
         # gets body txt data from storage
         
         # sets listing body
-        @browser.form(:id, 'new_listing').textarea.set "test"
+        @browser.form(:id, 'new_listing').textarea.set @post_object.body
         # sets location
         @browser.text_field(:id, 'listing_origin').set "huntington beach, ca"
         # upload file 
-        @photo = File.open("00909_8qYJaR8wTix_600x450.jpg", "r+") 
-        @path = File.expand_path(photo)
+        photo = File.open(@post_object.image_titles[0], "r+") 
+        path = File.expand_path(photo)
         @browser.file_field(:type,"file").set(path)
-        File.close
+ #      File.close
 
         # posts listing
         #browser.button(:name, 'button').click
         # below code checks if upload is successful
-        Watir::Wait.until { timeout = 60, browser.img(:class, 'fileupload-preview-image').src != '' }
+        Watir::Wait.until { timeout = 60, @browser.img(:class, 'fileupload-preview-image').src != '' }
         
-        sleep(1)
+        sleep(2)
         # clicks post listing
-        #browser.button(:name, 'button').click
+        @browser.button(:name, 'button').click
     end
     
 end

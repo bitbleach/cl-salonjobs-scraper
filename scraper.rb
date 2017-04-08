@@ -10,6 +10,8 @@ require 'watir'
 require "open-uri"
 
 require_relative 'scrapmethod'
+
+
 =begin
 url = 'https://orangecounty.craigslist.org/search/spa'
 
@@ -41,7 +43,21 @@ browser = Watir::Browser.start url
 data = ScrapeData.new(2 ,browser)
 data.setup
 
-#CSV.open('list_titles.csv', 'w') do |csv|
-#    csv << title_array
-#end
+browser.close
+headless.destroy
+
+url = 'https://peerdistrict.com/en/login'
+
+headless = Headless.new
+headless.start
+browser = Watir::Browser.start url 
+
+auto_list = AutoPost.new(browser, data)
+auto_list.login_peerdistrict
+auto_list.post_peerdistrict
+
 pry.start(binding)
+
+
+browser.close
+headless.destroy
