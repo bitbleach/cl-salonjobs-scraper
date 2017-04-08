@@ -40,6 +40,7 @@ browser = Watir::Browser.start url
 
 data = ScrapeData.new(browser)
 data.setup
+pry.start(binding)
 
 browser.close
 headless.destroy

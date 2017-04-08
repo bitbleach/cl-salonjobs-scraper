@@ -8,7 +8,5 @@ require 'mechanize'
 require_relative 'scrapmethod'
 
 
-a = File.open("00909_8qYJaR8wTix_600x450.jpg", "a") 
-#puts a.dirname
-
+File.delete('00L0L_lwfxripobnd_600x450.jpg')
 pry.start(binding)

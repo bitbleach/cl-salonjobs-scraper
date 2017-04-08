@@ -54,6 +54,13 @@ attr_reader :image_titles
         @latitude = @browser.div(:id, 'map').data_latitude
         @longitude = @browser.div(:id, 'map').data_longitude
     end
+
+    def delete
+        @image_titles.each do |title|
+            File.delete(title)
+        end
+    end
+
     
 end
 
