@@ -4,41 +4,53 @@ attr_reader :listing_title
 attr_reader :image_titles
 attr_reader :address
 attr_reader :city
+attr_reader :flag
+attr_reader :img_flag
+attr_reader :map_flag
 
     def initialize(browser)
         # Instance variables
         @browser = browser
         @image_titles = []
         @image_links = []
+        @flag = false
+        @img_flag = false
+        @map_flag = false
     end
     
     def setup
-        img_num
         scrape_text
-        location
         img_dl
+        keyword_flag
     end
     
     def img_num
-        @img_num = @browser.span(:class, 'slider-info').text
-        @img_num = @img_num[-1].to_i
-        
-        if @img_num > 5
-            @img_num = 5
+        if @browser.span(:class, 'slider-info').exist?
+            @img_num = @browser.span(:class, 'slider-info').text
+            @img_num = @img_num[-1].to_i
+            
+            if @img_num > 5
+                @img_num = 5
+            end
+        else
+            @img_flag = true
         end
     end
     
     def img_dl
-        (1..@img_num).each do |count|
-            
-            href_holder = @browser.a(:title, "#{count}").href
-            @image_links.push(href_holder)
-            
-            title = href_holder.match /\/(?!.*\/)(.*)/
-            title = title[1]
-            @image_titles.push(title)
-        end
-        file(@image_links, @image_titles)
+            img_num
+            unless @img_flag == true
+                (1..@img_num).each do |count|
+                    
+                    href_holder = @browser.a(:title, "#{count}").href
+                    @image_links.push(href_holder)
+                    
+                    title = href_holder.match /\/(?!.*\/)(.*)/
+                    title = title[1]
+                    @image_titles.push(title)
+                end
+                file(@image_links, @image_titles)
+            end
     end
     
     def file(image_links, image_titles)
@@ -52,9 +64,21 @@ attr_reader :city
     def scrape_text
         @body = @browser.section(:id, 'postingbody').text
         @listing_title = @browser.title
-        @latitude = @browser.div(:id, 'map').data_latitude
-        @longitude = @browser.div(:id, 'map').data_longitude
+        map_check
+        unless @map_flag == true
+            @latitude = @browser.div(:id, 'map').data_latitude
+            @longitude = @browser.div(:id, 'map').data_longitude
+            location
+        end
     end
+    
+    def map_check
+        map_check = @browser.div(:id, 'map').exist?
+        if map_check == false
+            @map_flag = true
+        end
+    end
+    
     
     def location
         geo_localization = "#{@latitude},#{@longitude}"
@@ -63,13 +87,24 @@ attr_reader :city
         @city = query.city
     end
     
+    def post_date
+        @post_date = @browser.time.title
+    end
+    
     def delete
         @image_titles.each do |title|
             File.delete(title)
         end
     end
 
-    
+    def keyword_flag
+        @rentKW = @body.scan(/\brent\b/i).size
+        @rentalKW = @body.scan(/\brent\b/i).size
+        total_match = @rentKW + @rentalKW
+        if total_match > 0
+            @flag = true
+        end
+    end
 end
 
 
@@ -80,6 +115,11 @@ attr_reader :browser
         # Instance variables
         @browser = browser
         @post_object = object
+    end
+    
+    def auto_post
+        login_peerdistrict
+        post_peerdistrict
     end
     
     def login_peerdistrict

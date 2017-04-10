@@ -44,7 +44,6 @@ data.setup
 browser.close
 headless.destroy
 
-
 url = 'https://peerdistrict.com/en/login'
 
 headless = Headless.new
@@ -52,9 +51,8 @@ headless.start
 browser = Watir::Browser.start url 
 
 auto_list = AutoPost.new(browser, data)
-auto_list.login_peerdistrict
-auto_list.post_peerdistrict
-
+auto_list.auto_post
+data.delete
 
 pry.start(binding)
 

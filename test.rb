@@ -1,29 +1,39 @@
-
 require 'nokogiri'
 require 'httparty'
 require 'json'
 require 'csv'
 require 'pry'
-require 'mechanize'
+require 'sqlite3'
+
 require_relative 'scrapmethod'
+url = 'https://orangecounty.craigslist.org/spa/6075356365.html'
 
-url = 'https://orangecounty.craigslist.org/search/spa'
-page = HTTParty.get(url)
+headless = Headless.new
+headless.start
+browser = Watir::Browser.start url
 
-# google map scrape
-url = 'https://orangecounty.craigslist.org/spa/6068712195.html'
-agent = Mechanize.new
-doc = agent.get(url)
+data = ScrapeData.new(browser)
+data.setup
 
-latitude = doc.search('.mapbox').xpath('//div/@data-latitude').text
-longitude = doc.search('.mapbox').xpath('//div/@data-longitude').text
 
-# get posting body and remove useless header
-doc.search('.userbody').css('section#postingbody').css('p').remove
-body = doc.search('.userbody').css('section#postingbody').text
 
-File.open("body.txt", "a") do |line|
-    line.puts body
+begin
+    
+    db = SQLite3::Database.open "test.db"
+    db.execute "CREATE TABLE IF NOT EXISTS ListData(Id INTEGER PRIMARY KEY, 
+        Name TEXT, Price INT)"
+    db.execute("INSERT INTO ListData(id, name) VALUES(?, ?)", [1, 'Bugs Bunny'])
+
+rescue SQLite3::Exception => e 
+    
+    puts "Exception occurred"
+    puts e
+    
+ensure
+    db.close if db
 end
+
+browser.close
+headless.destroy
 
 pry.start(binding)
