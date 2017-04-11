@@ -1,8 +1,0 @@
-=> [32m#<ScrapeData:0x00000004310160[0m
- @browser[32m=[0m
-  [32m#<Watir::Browser:0x662d7c38114f1f92 url="https://orangecounty.craigslist.org/spa/6082900815.html" title="Fun Flexible Fitness & Wellness job">[0m,
- @flag[32m=[0m[1;36mfalse[0m,
- @image_links[32m=[0m[],
- @image_titles[32m=[0m[],
- @img_flag[32m=[0m[1;36mfalse[0m,
- @map_flag[32m=[0m[1;36mfalse[0m[32m>[0m

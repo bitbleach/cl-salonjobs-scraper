@@ -32,6 +32,7 @@ headless.destroy
 =end
 
 # gets data from individual listing
+
 url = 'https://orangecounty.craigslist.org/spa/6075356365.html'
 
 headless = Headless.new

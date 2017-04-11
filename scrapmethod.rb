@@ -7,6 +7,9 @@ attr_reader :city
 attr_reader :flag
 attr_reader :img_flag
 attr_reader :map_flag
+attr_reader :date_posted
+
+
 
     def initialize(browser)
         # Instance variables
@@ -64,6 +67,7 @@ attr_reader :map_flag
     def scrape_text
         @body = @browser.section(:id, 'postingbody').text
         @listing_title = @browser.title
+        post_date
         map_check
         unless @map_flag == true
             @latitude = @browser.div(:id, 'map').data_latitude
@@ -88,7 +92,7 @@ attr_reader :map_flag
     end
     
     def post_date
-        @post_date = @browser.time.title
+        @date_posted = @browser.time.title
     end
     
     def delete
@@ -110,6 +114,7 @@ end
 
 class AutoPost 
 attr_reader :browser
+attr_reader :date_posted
 
     def initialize(browser, object)
         # Instance variables
@@ -169,6 +174,7 @@ attr_reader :browser
         sleep(2)
         # clicks post listing
         @browser.button(:name, 'button').click
+        @date_posted = Time.now
     end
     
     def photo_upload
@@ -187,6 +193,8 @@ end
 class Container
 attr_reader :links
 attr_reader :list_count
+attr_reader :county
+
 
     def initialize(browser)
         # Instance variables
@@ -238,9 +246,21 @@ attr_reader :list_count
         url = @browser.url
         pattern = /(?<=\/\/).*(?=\.c)/
         @county_match = url.match pattern
+        @county = "#{@county_match[0]}"
         @county_match = /#{@county_match[0]}/
         @avoid_title = [/sola/i, /phenix/i]
         @avoid_title = Regexp.union(@avoid_title)
     end
 end
 
+def db_selection(object)
+    if object.flag == true
+        return 'rental'
+    elsif object.img_flag == true
+        return 'img_problem' 
+    elsif object.map_flag == true
+        return 'map_problem' 
+    else
+        return 'normal'
+    end
+end
