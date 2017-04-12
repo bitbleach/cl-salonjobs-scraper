@@ -103,7 +103,7 @@ attr_reader :date_posted
 
     def keyword_flag
         @rentKW = @body.scan(/\brent\b/i).size
-        @rentalKW = @body.scan(/\brent\b/i).size
+        @rentalKW = @body.scan(/\brental\b/i).size
         total_match = @rentKW + @rentalKW
         if total_match > 0
             @flag = true
@@ -115,6 +115,7 @@ end
 class AutoPost 
 attr_reader :browser
 attr_reader :date_posted
+attr_reader :post_link
 
     def initialize(browser, object)
         # Instance variables
@@ -128,8 +129,8 @@ attr_reader :date_posted
     end
     
     def login_peerdistrict
-        @browser.text_field(:name, 'person[login]').set 'fcukexpress@gmail.com'
-        @browser.text_field(:type, 'password').set 'asdqwe'
+        @browser.text_field(:name, 'person[login]').set 'jalcazar'
+        @browser.text_field(:type, 'password').set 'mherkhatang0531'
         @browser.button(:id, 'main_log_in_button').click
     end
     
@@ -163,7 +164,6 @@ attr_reader :date_posted
         # sets location
         @browser.text_field(:id, 'listing_origin').set @post_object.address
         photo_upload
-        
  #      File.close
 
         # posts listing
@@ -171,10 +171,12 @@ attr_reader :date_posted
         # below code checks if upload is successful
         Watir::Wait.until { timeout = 60, @browser.img(:class, 'fileupload-preview-image').src != '' }
         
-        sleep(2)
+        sleep(5)
         # clicks post listing
         @browser.button(:name, 'button').click
+        @post_link = @browser.url
         @date_posted = Time.now
+        sleep(2)
     end
     
     def photo_upload
@@ -183,6 +185,7 @@ attr_reader :date_posted
             photo = File.open(title, "r+") 
             path = File.expand_path(photo)
             @browser.file_field(:type,"file").set(path)
+            sleep(2)
         end
     end
 
