@@ -16,7 +16,7 @@ require_relative 'scrapmethod'
 db = SQLite3::Database.new( "ScrapeData.db" )
 db = SQLite3::Database.open "ScrapeData.db"
 # gets relevant listing links for county
-url = 'https://tucson.craigslist.org/search/spa?query=hair+stylist&hasPic=1&bundleDuplicates=1'
+url = 'https://orangecounty.craigslist.org/search/spa?bundleDuplicates=1&query=stylist&hasPic=1'
 
 begin
     headless = Headless.new
@@ -34,8 +34,16 @@ list_data = Container.new(browser)
 list_data.setup
 
 list_data.links.each do |link|
-
+    
+    #skips links 
+    match1 = db.execute("SELECT COUNT(*) FROM ListData WHERE Link=? ", link)
+    match2 = db.execute("SELECT COUNT(*) FROM BoothRentData WHERE Link=? ", link)
+    if match1[0][0] >= 1 || match2[0][0] >= 1
+        next 
+    end
+    
     # gets data from individual listing
+    
     browser.goto link
     
     data = ScrapeData.new(browser)
@@ -80,10 +88,11 @@ list_data.links.each do |link|
     
     sleep(5)
 end
-
-db.execute( "select * from BoothRentData" ) do |row|
+=begin
+db.execute( "select * from ListData" ) do |row|
   p row
 end
+=end
 db.close 
 
 browser.close

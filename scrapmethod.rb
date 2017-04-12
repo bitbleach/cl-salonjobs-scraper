@@ -8,7 +8,7 @@ attr_reader :flag
 attr_reader :img_flag
 attr_reader :map_flag
 attr_reader :date_posted
-
+attr_reader :img_num
 
 
     def initialize(browser)
@@ -31,10 +31,14 @@ attr_reader :date_posted
         if @browser.span(:class, 'slider-info').exist?
             @img_num = @browser.span(:class, 'slider-info').text
             @img_num = @img_num[-1].to_i
-            
+            if @img_num == 0
+                @img_num = 1
+            end
+            #bug probably above
             if @img_num > 5
                 @img_num = 5
             end
+
         else
             @img_flag = true
         end
@@ -43,15 +47,23 @@ attr_reader :date_posted
     def img_dl
             img_num
             unless @img_flag == true
-                (1..@img_num).each do |count|
-                    
-                    href_holder = @browser.a(:title, "#{count}").href
+                if @img_num == 1
+                    href_holder = @browser.img(:title, " 1").src
                     @image_links.push(href_holder)
-                    
                     title = href_holder.match /\/(?!.*\/)(.*)/
                     title = title[1]
                     @image_titles.push(title)
-                end
+                else
+                    (1..@img_num).each do |count|
+                        
+                        href_holder = @browser.a(:title, "#{count}").href
+                        @image_links.push(href_holder)
+                        
+                        title = href_holder.match /\/(?!.*\/)(.*)/
+                        title = title[1]
+                        @image_titles.push(title)
+                    end
+            end
                 file(@image_links, @image_titles)
             end
     end
@@ -70,9 +82,13 @@ attr_reader :date_posted
         post_date
         map_check
         unless @map_flag == true
-            @latitude = @browser.div(:id, 'map').data_latitude
-            @longitude = @browser.div(:id, 'map').data_longitude
-            location
+            begin
+                @latitude = @browser.div(:id, 'map').data_latitude
+                @longitude = @browser.div(:id, 'map').data_longitude
+                location
+            rescue
+                @map_flag == true
+            end
         end
     end
     
@@ -156,11 +172,24 @@ attr_reader :post_link
         # Hiring Employees 58185
         @browser.div(:id, 'option-groups').a(:data_id, '58185').click
         # sets listing title
-        @browser.text_field(:id, 'listing_title').set @post_object.listing_title
+        begin
+            @browser.text_field(:id, 'listing_title').set @post_object.listing_title
+        rescue
+            puts "Body Title Error"
+            puts @post_object.listing_title
+            @browser.text_field(:id, 'listing_title').set "Post Error"
+        end
+    
         # gets body txt data from storage
         
         # sets listing body
-        @browser.form(:id, 'new_listing').textarea.set @post_object.body
+        begin
+            @browser.form(:id, 'new_listing').textarea.set @post_object.body
+        rescue
+            puts "Body Post Error"
+            puts @post_object.listing_title
+            @browser.form(:id, 'new_listing').textarea.set "Post error"
+        end
         # sets location
         @browser.text_field(:id, 'listing_origin').set @post_object.address
         photo_upload
@@ -185,7 +214,7 @@ attr_reader :post_link
             photo = File.open(title, "r+") 
             path = File.expand_path(photo)
             @browser.file_field(:type,"file").set(path)
-            sleep(2)
+            sleep(3)
         end
     end
 
