@@ -18,6 +18,8 @@ browser = Watir::Browser.start url
 
 #a = browser.text_field(name: 'person[login]')
 a = browser
+
+## website is now defunct, just a sample user and password is shown below
 browser.text_field(:name, 'person[login]').set 'fcukexpress@gmail.com'
 browser.text_field(:type, 'password').set 'asdqwe'
 browser.button(:id, 'main_log_in_button').click
